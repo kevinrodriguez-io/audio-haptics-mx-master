@@ -1,0 +1,8 @@
+/target/
+/build/
+.DS_Store
+*.app/Contents/MacOS/*.dSYM/
+.idea/
+.vscode/
+*.xcuserstate
+DerivedData/

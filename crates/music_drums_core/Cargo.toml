@@ -1,0 +1,26 @@
+[package]
+name = "music_drums_core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "System-audio onset detection and MX Master 4 HID++ haptics for Music Drums"
+
+[lib]
+name = "music_drums_core"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+anyhow = "1"
+hidapi = { version = "2", features = ["macos-shared-device"] }
+parking_lot = "0.12"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "2"
+tracing = "0.1"
+
+[dev-dependencies]
+tempfile = "3"
+
+[[bin]]
+name = "music-drums-cli"
+path = "src/bin/music_drums_cli.rs"
