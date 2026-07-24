@@ -119,8 +119,8 @@ pub fn parse_get_feature_response(data: &[u8]) -> Option<(u8, u8, u8)> {
     if d.len() < 6 {
         return None;
     }
-    // d: [device, featIdx_echo?, func, featIndex, featType, version] — varies by stack.
     // Standard: response params at bytes 4.. of full report = index, type, version
+    // (layout varies slightly by stack)
     if data[0] == 0x11 || data[0] == 0x10 {
         Some((data[4], data[5], data[6]))
     } else {
@@ -144,8 +144,8 @@ pub fn haptic_set_config_report(
     )
 }
 
-/// Same as [`haptic_set_config_report`] but as a long (0x11) report — required on
-/// macOS Bluetooth FF43 interfaces that only expose the long output report.
+/// Same as [`haptic_set_config_report`] but as a long (0x11) report.
+/// Required on macOS Bluetooth FF43 interfaces that only expose the long output report.
 pub fn haptic_set_config_long_report(
     device_index: u8,
     feature_index: u8,

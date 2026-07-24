@@ -1,8 +1,6 @@
-# Music Drums — Architecture
+# Music Drums architecture
 
-## Overview
-
-Music Drums is a macOS menu-bar app that turns system audio onsets into MX Master 4 haptic pulses via HID++ feature `0x19B0`.
+System audio onsets become MX Master 4 haptic pulses via HID++ `0x19B0`.
 
 ```
 System audio → Swift Process Tap → md_push_audio_frames
@@ -14,29 +12,29 @@ System audio → Swift Process Tap → md_push_audio_frames
                                    MX Master 4 LRA
 ```
 
-While **Drums mode** is on, `Scripts/logi-mode.sh` parks Logi Options+ (and Logi Plugin Service) so the app can own the HID interfaces. Exiting drums mode restores the LaunchAgent.
+Drums mode runs `Scripts/logi-mode.sh` to park Options+ (and Logi Plugin Service) so we can open the HID interfaces. Exiting drums mode restores the LaunchAgent.
 
 ## Components
 
 | Piece | Role |
 |-------|------|
-| `apps/MusicDrums` | SwiftUI menu bar, Process Tap, Options+ toggle, TCC |
+| `apps/MusicDrums` | Menu bar, Process Tap, Options+ toggle, TCC |
 | `crates/music_drums_core` | DSP, mapper, HID++, C ABI |
 | `Scripts/logi-mode.sh` | Session disable/enable Options+ |
 | `Scripts/build.sh` | arm64 Rust staticlib + swiftc `.app` |
 
-## Why Process Tap is in Swift
+## Why Process Tap lives in Swift
 
-`CATapDescription` is an Objective-C Core Audio type. Hosting the tap in the signed Swift app keeps a single TCC identity for **Audio Capture** (`NSAudioCaptureUsageDescription`). PCM is pushed into Rust for realtime analysis.
+`CATapDescription` is Objective-C. Keeping the tap in the signed app gives one TCC identity for Audio Capture. PCM is pushed into Rust for analysis.
 
 ## Transports
 
-`open_best_transport()` prefers **Logi Bolt**, then **Bluetooth**:
+`open_best_transport()` prefers Bolt, then Bluetooth:
 
-- Bolt: short (usage `0x0001`) + long (usage `0x0002`) vendor collections; haptic commands use `send_output_report` (SET_REPORT) per MasterMice findings.
-- Bluetooth: MX Master 4 product / name match; same `0x19B0` payloads; device index `0xFF` then `0x01`.
+- **Bolt:** short (`0x0001`) + long (`0x0002`) on `0xFF00`; haptics use short + SET_REPORT; device index often `0x02`.
+- **Bluetooth (macOS):** `0xFF43` / `0x0202`; haptic config/trigger as long (`0x11`) reports; device index usually `0xFF`.
 
-Reconnect: engine retries transport open with backoff if set/trigger fails.
+Non-exclusive open on macOS (`macos-shared-device`) so the cursor still works. Engine reconnects with backoff if set/trigger fails.
 
 ## C ABI
 
@@ -51,5 +49,6 @@ See `crates/music_drums_core/include/music_drums.h`:
 ## Permissions / signing
 
 - macOS 14.4+
-- Ad-hoc or Developer ID signature (unsigned Process Taps often deliver silence)
-- User grants Audio Capture on first start
+- Ad-hoc or Developer ID signing (unsigned Process Taps often deliver silence)
+- Audio Capture on first start
+- Input Monitoring if HID open is denied

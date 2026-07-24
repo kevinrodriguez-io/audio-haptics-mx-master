@@ -38,9 +38,9 @@ pub trait HapticTransport: Send {
 }
 
 enum ShortPipe {
-    /// Dedicated short collection (Bolt FF00 / usage 1) — report id 0x10.
+    /// Dedicated short collection (Bolt FF00 / usage 1), report id 0x10.
     Dedicated(HidDevice),
-    /// Bluetooth FF43/0202 — typically only accepts long report id 0x11.
+    /// Bluetooth FF43/0202; typically only accepts long report id 0x11.
     SharedLongOnly,
 }
 
@@ -351,8 +351,8 @@ fn open_bluetooth(api: &HidApi) -> Result<Box<dyn HapticTransport>, HidppError> 
         .and_then(|d| path_owned(d))
         .ok_or_else(|| {
             HidppError::Io(
-                "Bluetooth HID++ interface (page=0xFF43 usage=0x0202) not found — \
-                 is the mouse on Bluetooth? Bolt uses FF00 instead."
+                "Bluetooth HID++ interface (page=0xFF43 usage=0x0202) not found. \
+                 Is the mouse on Bluetooth? Bolt uses FF00 instead."
                     .into(),
             )
         })?;
