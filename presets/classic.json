@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "id": "classic",
+  "name": "Classic",
+  "description": "Original multi-band onset detector (pre-house tuning).",
+  "sensitivity": 0.65,
+  "detector": {
+    "mode": "multiband",
+    "cooldown_ms": 80.0,
+    "history_len": 48,
+    "flux_base": 0.002,
+    "flux_mean_mul": 2.5,
+    "low_weight": 1.6,
+    "mid_weight": 1.1,
+    "high_weight": 0.7,
+    "lp_hz": 140.0,
+    "bass_ratio_min": 0.55,
+    "floor_mul_base": 3.2,
+    "floor_mul_sens_span": 3.5,
+    "cooldown_sens_span_ms": 0.0
+  },
+  "mapper": {
+    "min_interval_ms": 70.0,
+    "scale_interval_with_sensitivity": false,
+    "intensity_floor": 60,
+    "intensity_ceil": 100,
+    "drop_hats": false,
+    "strength_scale_base": 0.5,
+    "strength_scale_sens": 1.0,
+    "min_strength_base": 0.08,
+    "min_strength_sens_span": 0.0,
+    "kick_strong_at": 0.55,
+    "kick_tick_at": 0.25,
+    "use_compound_kick": true,
+    "pulse_dynamics": false
+  },
+  "engine": {
+    "drain_frames": 512,
+    "idle_sleep_ms": 1,
+    "intensity_update_every_hits": 1,
+    "intensity_delta_threshold": 0,
+    "base_intensity": 75
+  }
+}

@@ -95,6 +95,12 @@ case "$cmd" in
     ;;
   enter-drums)
     disable_logi
+    # Options+ helpers sometimes respawn once; second pass after a beat.
+    sleep 0.6
+    kill_logi_procs
+    sleep 0.3
+    kill_logi_procs
+    echo "Logi Options+ parked for drums mode"
     ;;
   exit-drums)
     enable_logi

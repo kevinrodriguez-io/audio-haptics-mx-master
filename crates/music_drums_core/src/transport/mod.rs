@@ -264,9 +264,17 @@ pub fn open_best_transport() -> Result<Box<dyn HapticTransport>, HidppError> {
     match open_bolt(&api) {
         Ok(t) => Ok(t),
         Err(bolt_err) => open_bluetooth(&api).map_err(|bt_err| {
+            let bt = bt_err.to_string();
+            let hint = if bt.contains("0xE00002E2") || bt.to_lowercase().contains("not permitted")
+            {
+                "macOS blocked HID open (0xE00002E2). Grant Input Monitoring to MusicDrums \
+                 (System Settings → Privacy & Security → Input Monitoring), then quit and reopen the app."
+            } else {
+                "Park Options+ with Scripts/logi-mode.sh disable, wake the mouse, then retry. \
+                 CLI: music-drums-cli devices"
+            };
             HidppError::Io(format!(
-                "no usable MX4 link (bolt: {bolt_err}; bluetooth: {bt_err}). \
-                 Run `music-drums-cli devices` and park Options+ with Scripts/logi-mode.sh disable."
+                "no usable MX4 link (bolt: {bolt_err}; bluetooth: {bt}). {hint}"
             ))
         }),
     }

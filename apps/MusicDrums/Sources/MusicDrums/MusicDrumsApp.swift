@@ -11,8 +11,9 @@ struct MusicDrumsApp: App {
                 Text("MX Master 4 Music Drums")
                     .font(.headline)
 
-                Toggle("Drums mode", isOn: $appState.drumsEnabled)
+                Toggle("Drums mode", isOn: appState.drumsModeBinding)
                     .toggleStyle(.switch)
+                    .disabled(appState.isChangingMode)
 
                 HStack {
                     Text("Sensitivity")
@@ -25,6 +26,9 @@ struct MusicDrumsApp: App {
 
                 Divider()
 
+                LabeledContent("Preset") {
+                    Text(appState.presetName)
+                }
                 LabeledContent("Link") {
                     Text(appState.linkLabel)
                 }
@@ -35,14 +39,44 @@ struct MusicDrumsApp: App {
                     Text(appState.optionsParked ? "Parked" : "Active / unknown")
                 }
 
+                InputMeterView(
+                    samples: appState.waveform,
+                    level: appState.inputLevel,
+                    framesReceived: appState.audioFramesReceived,
+                    isLive: appState.drumsEnabled && appState.tapRunning
+                )
+
+                if appState.isChangingMode {
+                    Text("Starting…")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+
                 if let err = appState.lastError, !err.isEmpty {
                     Text(err)
                         .font(.caption)
                         .foregroundStyle(.red)
-                        .lineLimit(4)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .frame(maxWidth: 260, alignment: .leading)
+
+                    if err.contains("0xE00002E2")
+                        || err.localizedCaseInsensitiveContains("not permitted")
+                        || err.localizedCaseInsensitiveContains("Input Monitoring")
+                    {
+                        Button("Open Input Monitoring…") {
+                            HidAccess.openSystemSettings()
+                        }
+                    }
                 }
 
                 Divider()
+
+                Button("Configure…") {
+                    appState.showConfig = true
+                }
+                .popover(isPresented: $appState.showConfig, arrowEdge: .bottom) {
+                    ConfigView(appState: appState)
+                }
 
                 Button("Test pulse") {
                     appState.testPulse()
@@ -61,7 +95,7 @@ struct MusicDrumsApp: App {
                 }
             }
             .padding(12)
-            .frame(width: 280)
+            .frame(width: 300)
         }
         .menuBarExtraStyle(.window)
     }

@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "id": "house",
+  "name": "House / Electronic",
+  "description": "Kick-focused detector; drops hats; lower latency drains.",
+  "sensitivity": 0.55,
+  "detector": {
+    "mode": "kick",
+    "cooldown_ms": 100.0,
+    "history_len": 96,
+    "flux_base": 0.0008,
+    "flux_mean_mul": 3.2,
+    "low_weight": 1.6,
+    "mid_weight": 1.1,
+    "high_weight": 0.7,
+    "lp_hz": 140.0,
+    "bass_ratio_min": 0.55,
+    "floor_mul_base": 3.2,
+    "floor_mul_sens_span": 3.5,
+    "cooldown_sens_span_ms": 60.0
+  },
+  "mapper": {
+    "min_interval_ms": 110.0,
+    "scale_interval_with_sensitivity": true,
+    "intensity_floor": 40,
+    "intensity_ceil": 95,
+    "drop_hats": true,
+    "strength_scale_base": 0.35,
+    "strength_scale_sens": 0.9,
+    "min_strength_base": 0.18,
+    "min_strength_sens_span": 0.22,
+    "kick_strong_at": 0.72,
+    "kick_tick_at": 0.4,
+    "use_compound_kick": false,
+    "pulse_dynamics": true
+  },
+  "engine": {
+    "drain_frames": 512,
+    "idle_sleep_ms": 1,
+    "intensity_update_every_hits": 8,
+    "intensity_delta_threshold": 25,
+    "base_intensity": 70
+  }
+}

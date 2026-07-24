@@ -82,11 +82,38 @@ PLIST
 cp "${ROOT}/Scripts/logi-mode.sh" "${APP}/Contents/Resources/logi-mode.sh"
 chmod +x "${APP}/Contents/Resources/logi-mode.sh" "${ROOT}/Scripts/logi-mode.sh"
 
-echo "==> ad-hoc sign (required for Process Tap / TCC)"
-codesign --force --deep --sign - \
-  --entitlements "${SWIFT_DIR}/MusicDrums.entitlements" \
-  "${APP}" 2>/dev/null || codesign --force --deep --sign - "${APP}"
+# Prefer a stable Apple Development identity so Input Monitoring TCC survives rebuilds.
+# Ad-hoc (`-`) changes CDHash every build and macOS treats it as a new app.
+pick_signing_identity() {
+  if [[ -n "${CODESIGN_IDENTITY:-}" ]]; then
+    echo "${CODESIGN_IDENTITY}"
+    return
+  fi
+  local id
+  id="$(security find-identity -v -p codesigning 2>/dev/null \
+    | sed -n 's/.*"\(Apple Development:.*\)"/\1/p' \
+    | head -1)"
+  if [[ -n "$id" ]]; then
+    echo "$id"
+    return
+  fi
+  echo "-"
+}
+
+IDENTITY="$(pick_signing_identity)"
+echo "==> codesign with: ${IDENTITY}"
+if [[ "$IDENTITY" == "-" ]]; then
+  echo "warn: no Apple Development identity; ad-hoc signing — Input Monitoring must be re-granted after every rebuild" >&2
+  codesign --force --deep --sign - \
+    --entitlements "${SWIFT_DIR}/MusicDrums.entitlements" \
+    "${APP}" 2>/dev/null || codesign --force --deep --sign - "${APP}"
+else
+  codesign --force --deep --options runtime --sign "${IDENTITY}" \
+    --entitlements "${SWIFT_DIR}/MusicDrums.entitlements" \
+    "${APP}"
+fi
 
 echo "Built ${APP}"
 echo "Run: open ${APP}"
 echo "CLI: cargo run -p music_drums_core --release --bin music-drums-cli -- ping"
+echo "After first launch: enable MusicDrums under System Settings → Privacy & Security → Input Monitoring"
